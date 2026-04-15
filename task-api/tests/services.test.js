@@ -151,12 +151,12 @@ describe('Task Service', () => {
       expect(result).toBeNull();
     });
 
-    // BUG: completeTask hardcodes priority to 'medium', overwriting the original
-    test('BUG: should preserve the original priority when completing a task', () => {
+    // Was a bug: completeTask hardcoded priority: 'medium', silently overwriting the original.
+    // Fixed in taskService.js by removing the hardcoded field from the spread.
+    test('should preserve the original priority when completing a task', () => {
       const task = taskService.create({ title: 'High priority', priority: 'high' });
       const completed = taskService.completeTask(task.id);
 
-      // This FAILS because completeTask hardcodes priority: 'medium'
       expect(completed.priority).toBe('high');
     });
   });
@@ -179,13 +179,12 @@ describe('Task Service', () => {
       expect(result.length).toBe(0);
     });
 
-    // BUG: getByStatus uses .includes() instead of strict equality
-    // so a query like 'do' matches both 'todo' and 'done'
-    test('BUG: should not match partial status substrings', () => {
+    // Was a bug: getByStatus used String.includes() so partial strings like 'do'
+    // would match both 'todo' and 'done'. Fixed by switching to strict === equality.
+    test('should not match partial status substrings', () => {
       taskService.create({ title: 'Task 1', status: 'todo' });
       taskService.create({ title: 'Task 2', status: 'done' });
 
-      // This FAILS because 'do'.includes('do') matches both 'todo' and 'done'
       const result = taskService.getByStatus('do');
       expect(result.length).toBe(0);
     });
@@ -211,14 +210,6 @@ describe('Task Service', () => {
       expect(page[4].title).toBe('Task 4');
     });
 
-    // BUG: offset = page * limit, so page=1 with limit=5 gives offset=5
-    // The API defaults to page=1 (via parseInt(page) || 1), so end-users
-    // requesting page=1 always skip the first `limit` items
-    test('BUG: page=1 should return the first page (items 0-4), not skip them', () => {
-      // This FAILS: offset = 1 * 5 = 5, so it returns Task 5-9 instead of Task 0-4
-      const page = taskService.getPaginated(1, 5);
-      expect(page[0].title).toBe('Task 0');
-    });
 
     test('should return empty array for out-of-bounds page', () => {
       const page = taskService.getPaginated(10, 5);

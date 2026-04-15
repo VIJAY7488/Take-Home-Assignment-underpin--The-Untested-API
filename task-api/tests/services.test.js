@@ -201,12 +201,12 @@ describe('Task Service', () => {
     });
 
     test('should return the correct number of items', () => {
-      const page = taskService.getPaginated(0, 5);
+      const page = taskService.getPaginated(1, 5);
       expect(page.length).toBe(5);
     });
 
-    test('should return the correct slice for page 0', () => {
-      const page = taskService.getPaginated(0, 5);
+    test('should return the correct slice for page 1 (first page)', () => {
+      const page = taskService.getPaginated(1, 5);
       expect(page[0].title).toBe('Task 0');
       expect(page[4].title).toBe('Task 4');
     });
